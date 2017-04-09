@@ -7,31 +7,7 @@
 #endif
 
 
-const uint8_t phGamma8[] = {
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
-    1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
-    2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
-    5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
-   10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
-   17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
-   25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
-   37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
-   51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
-   69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
-   90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
-  115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
-  144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
-  177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
-  215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
 
-
-
-
-
-/**
- * @brief      Constructs the object.
- */
 prodigy2::prodigy2():ir(3){
 	phRemote ir(3);
 
@@ -45,77 +21,54 @@ prodigy2::prodigy2():ir(3){
 	every10000ms.start();
 };
 
-/**
- * @brief      Destroys the object.
- */
-prodigy2::~prodigy2(){
-};
+//PRODIGY SETUP
+	void prodigy2::configure(){
+
+		//Initialize all hardware
+		Serial.println("Config started");
+		settings.loadCheck();
+		setupLEDS(settings.hwf.data.LEDCount);
+		setupIR();
+		//setupIMU();
+		initProp();
+
+		//settings.hwf.data.LEDCount = 130;
+		//hwFile setPoint = *settings.hwf;
+		//settings.updateLEDCount(130);
+		
+		//bootUpAnimate();
+		//waver2.rev = true;
+		//waver3.width= LEDCount;
+	};
 
 
-/**
- * @brief      { function_description }
- */
-void prodigy2::configure(){
+	void prodigy2::setupLEDS(int _LEDCount){
+		Serial.println(F("Starting LED Setup"));
+		
+		userBrightnessLevel = settings.user.data.brightLevelOnStartUp;
+		LEDCount = _LEDCount;
+		LEDMid=LEDCount/2;
 
-	//Initialize all hardware
-	Serial.println("Config started");
-	settings.loadCheck();
-	setupLEDS(settings.hwf.data.LEDCount);
-	setupIR();
-	//setupIMU();
-	initProp();
+		leds = new CRGB[LEDCount];
+		//TmpLED = new CRGB[LEDCount];
 
-	//settings.hwf.data.LEDCount = 130;
-	//hwFile setPoint = *settings.hwf;
-	//settings.updateLEDCount(130);
-	
-	//bootUpAnimate();
-	waver2.rev = true;
-	//waver3.width= LEDCount;
-};
+		FastLED.addLeds<APA102,11,13,GBR,DATA_RATE_MHZ(12)>(leds,LEDCount);
+		FastLED.setMaxPowerInVoltsAndMilliamps(settings.hwf.data.maxVoltage,100); 
+		FastLED.setCorrection( TypicalSMD5050 );
+		FastLED.setDither(0);
+		setUserBrightness();		
+	};
+	void prodigy2::setupIR(){
+		Serial.println("Starting IR In");
+		ir.start();
+	};
+	void prodigy2::initProp(){
+
+		prop.configure();
+	};
+//END
 
 
-/**
- * @brief      { function_description }
- *
- * @param[in]  _LEDCount  The led count
- */
-void prodigy2::setupLEDS(int _LEDCount){
-	Serial.println(F("Starting LED Setup"));
-	
-	userBrightnessLevel = settings.user.data.brightLevelOnStartUp;
-	LEDCount = _LEDCount;
-	LEDMid=LEDCount/2;
-
-	leds = new CRGB[LEDCount];
-	tmpLED = new CRGB[LEDCount];
-
-	FastLED.addLeds<APA102,11,13,GBR,DATA_RATE_MHZ(12)>(leds,LEDCount);
-	FastLED.setMaxPowerInVoltsAndMilliamps(settings.hwf.data.maxVoltage,400); 
-	FastLED.setCorrection( TypicalSMD5050 );
-	FastLED.setDither(0);
-	setUserBrightness();		
-};
-
-/**
- * @brief      { function_description }
- */
-void prodigy2::setupIR(){
-	Serial.println("Starting IR In");
-	ir.start();
-};
-
-/**
- * @brief      { function_description }
- */
-void prodigy2::initProp(){
-
-	prop.configure();
-};
-
-/**
- * @brief      { function_description }
- */
 void prodigy2::bootUpAnimate(){
 	Serial.println(F("Starting Boot Up Animate"));
 	int t = millis();
@@ -171,9 +124,6 @@ void prodigy2::bootUpAnimate(){
 		delay(1);
 	}
 };
-
-
-
 void prodigy2::setUserBrightness(){
 	uint8_t mapBright = map(userBrightnessLevel,0,255,15,settings.hwf.data.maxBrightLevel);
 	mapBright = phGamma8[mapBright];
@@ -182,8 +132,6 @@ void prodigy2::setUserBrightness(){
 
 	//TO-DO Add a limiterFlash here at low&high limit of bright level
 };
-
-
 void prodigy2::changeUserBrightnessLevel(int valToAdd){
 	u8AddLimSafe(userBrightnessLevel,valToAdd,0,255);
 	setUserBrightness();
@@ -191,7 +139,9 @@ void prodigy2::changeUserBrightnessLevel(int valToAdd){
 
 
 void prodigy2::Run(){
+
 	doEveryCycle();
+
 	if(optionDisplayActive){
 		prop.displayOption(activeOptionDisplay);
 	}
@@ -200,6 +150,7 @@ void prodigy2::Run(){
 		prop.postFX();
 		prop.show();
 	}
+
 };
 
 /**
@@ -217,7 +168,7 @@ void prodigy2::doEveryCycle(){
 	}
 	if(!every10000ms.running()){
 		batLevel = 2*4.2*analogRead(A1)/1024;
-		//doEvery10000Millis();
+		doEvery10000Millis();
 		every10000ms.reSet();
 	}
 };
@@ -226,8 +177,27 @@ void prodigy2::doEveryCycle(){
  * @brief      { function_description }
  */
 void prodigy2::doEvery1000Millis(){
-	//Serial.print(F("freeMemory()="));
-		//Serial.println(freeMemory());
+	batLevel = 2*4.2*analogRead(A1)/1024;
+	Serial.print(F("batLevel : "));
+	Serial.print(batLevel);
+	//Serial.print();
+	Serial.print(F("freeMemory() = "));
+	Serial.print(freeMemory());
+	Serial.print(F(" | millis() Time = : "));
+	Serial.print(millis());
+	//Serial.print();
+	Serial.print(F(" | frameDelay ="));
+	Serial.print(prop.frameDelay);
+	Serial.println();
+	
+};
+
+void prodigy2::doEvery10000Millis(){
+	Serial.print(F("Every10SecStarted "));
+	Serial.println();
+
+	
+	
 };
 
 /**
@@ -270,20 +240,21 @@ protege::~protege(){
  */
 void protege::configure(){
 
-	phMaker maker;
+	
+	//maker.load();
+	//maker.prep();
+
+	//maker2.load();
+	//maker2.prep();
+	blendy.load();
+	blendy.prep();
 };
 
-/**
- * @brief      Creates a menu.
- */
+
 void protege::createMenu(){
 };
 
-/**
- * @brief      { function_description }
- *
- * @param[in]  activeOptionDisplay  The active option display
- */
+
 void protege::displayOption(uint8_t activeOptionDisplay){
 	switch(activeOptionDisplay){
 		case OD_SET_BRIGHTNESS:
@@ -315,32 +286,26 @@ void protege::play(){
 	FastLED.clear();
 	pflow2.leds[beatMarker]=CHSV(123,255,255);
 	*/
-	testAnimation();
+
+	blendy.run();
 	
 	FastLED.show();
 		
 };
 
 
-/**
- * @brief      Posts a fx.
- */
 void protege::postFX(){
 };
 
-/**
- * @brief      { function_description }
- */
+
 void protege::show(){
 	FastLED.show();
-	//delay(1);
+	delayMicroseconds(100);
+	frameDelay=micros()-lastFrameTime;
+	lastFrameTime=micros();
 };
 
-/**
- * @brief      { function_description }
- *
- * @param[in]  _action  The action
- */
+
 void protege::control(uint8_t _action){
 	Serial.print("Prop received request to perform action with id: ");
 	Serial.println(_action);
@@ -374,12 +339,6 @@ void protege::control(uint8_t _action){
 	}
 };
 
-
-/**
- * @brief      Sets the user brightness gui.
- *
- * @param      displayControl  The display control
- */
 void protege::setUserBrightnessGUI(optionsDisplay &displayControl){
 	FastLED.clear();
 
@@ -397,11 +356,6 @@ void protege::setUserBrightnessGUI(optionsDisplay &displayControl){
 	//Serial.println(timeTillExit);
 };
 
-/**
- * @brief      Sets the bpmgui.
- *
- * @param      displayControl  The display control
- */
 void protege::setBPMGUI(optionsDisplay &displayControl){
 	FastLED.clear();
 	CHSV color = CHSV(220,255,255);
@@ -452,10 +406,8 @@ void protege::setBPMGUI(optionsDisplay &displayControl){
 	FastLED.show();
 };
 
+/*
 
-/**
- * @brief      Constructs the object.
- */
 prodigy::prodigy() : ir(3){
 	//Run phConfig routine
 	//-- Checks for fresh install
@@ -479,9 +431,13 @@ prodigy::prodigy() : ir(3){
 	//ir.start();
 };
 
+*/
+
+
+
+/*
 prodigy::~prodigy(){
 };
-
 void prodigy::configure(){
 
 	//sets.loadCheck();
@@ -490,13 +446,9 @@ void prodigy::configure(){
 	//setupLED();
 	// irrecv.enableIRIn(); // Start the receiver
 };
-
-
 void prodigy::setupIMU(){
 	imu.startUp();
 };
-
-
 void prodigy::setupLED(){
 	
 	FastLED.addLeds<APA102,11,13,GBR,DATA_RATE_MHZ(12)>(leds,54);
@@ -513,17 +465,11 @@ void prodigy::setupLED(){
 	make.sets = sets;
 };
 
-/**
- * @brief      Posts a fx.
- */
 void prodigy::postFX(){
 
 	blur1d(leds,ledCount,postBlurAmount);
 };
 
-/**
- * @brief      { function_description }
- */
 void prodigy::cycleChecks(){
 	//Serial.println("running cycle");
 	//Serial.println("Try Play");
@@ -540,22 +486,15 @@ void prodigy::cycleChecks(){
  	// 	imu.update();
 };
 
-
-/**
- * @brief      { function_description }
- */
 void prodigy::play(){
 	//make.makeThis(0);
 	/*switch(sets.run.data.currentProgram){
 		case ANIMATION_PLAYER:
 			make.makeThis(sets.params.data.makerIndex);
 		break;
-	};*/
-};
+	};
+}
 
-/**
- * @brief      { function_description }
- */
 void prodigy::show(){
 	//play();
 	
@@ -565,23 +504,11 @@ void prodigy::show(){
 	//FastLED.clear();
 };
 
-/**
- * @brief      { function_description }
- *
- * @param[in]  val   The value
- *
- * @return     { description_of_the_return_value }
- */
 uint8_t prodigy::u82l(uint8_t val){
 
 	return map(val,0,255,0,54);
 };
 
-/**
- * @brief      { function_description }
- *
- * @param[in]  rollVal  The roll value
- */
 void prodigy::rollLED(uint8_t rollVal){
 
 	for(int i=0;i<54;i++)
@@ -594,42 +521,20 @@ void prodigy::rollLED(uint8_t rollVal){
 	}	
 };
 
-
-/**
- * @brief      Sets the brightness.
- */
 void prodigy::setBrightness(){
 };
 
-/**
- * @brief      { function_description }
- */
 void prodigy::brightUp(){
 };
 
-/**
- * @brief      { function_description }
- */
 void prodigy::brightDown(){
 };
 
-/**
- * @brief      { function_description }
- */
 void prodigy::checkBattery(){
 
 	batLevel = 2*4.2*analogRead(A1)/1024;
 };
 
-
-/**
- * @brief      { function_description }
- *
- * @param[in]  flashOnTime   The flash on time
- * @param[in]  flashOffTime  The flash off time
- * @param[in]  flashRepeats  The flash repeats
- * @param[in]  hue           The hue
- */
 void prodigy::flash(uint8_t flashOnTime, uint8_t flashOffTime, uint8_t flashRepeats, uint8_t hue){
 	for(int i=0;i<54;i++)
 	{
@@ -656,9 +561,6 @@ void prodigy::flash(uint8_t flashOnTime, uint8_t flashOffTime, uint8_t flashRepe
 	FastLED.show();
 };
 
-/**
- * @brief      { function_description }
- */
 void prodigy::animatedLevel(){
 	phTimer timer;
 	timer.setMillis(250);
@@ -675,12 +577,6 @@ void prodigy::animatedLevel(){
 	}
 };
 
-/**
- * @brief      Splits a chase up.
- *
- * @param[in]  chaseTime     The chase time
- * @param[in]  postWaitTime  The post wait time
- */
 void prodigy::splitChaseUp(int chaseTime,int postWaitTime){
 	FastLED.clear();
 	phTimer timer;
@@ -706,6 +602,7 @@ void prodigy::splitChaseUp(int chaseTime,int postWaitTime){
 	delay(postWaitTime);
 };
 
+*/
 
 /**
  * @brief      Constructs the object.

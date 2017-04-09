@@ -57,7 +57,7 @@
 #define irSave 44
 
 
-class prodigy;
+//class prodigy;
 
 
 
@@ -132,7 +132,7 @@ class phRemote{
 
 	int activeParamSet=1;	
 	
-	void passProdigy(prodigy *phIn);
+	//void passProdigy(prodigy *phIn);
 
 	IRrecv irrecv;
 	decode_results results;

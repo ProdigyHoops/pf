@@ -4,7 +4,7 @@
 
 
 
-
+/*
 
 
 maker::maker(){
@@ -26,11 +26,12 @@ void maker::makeThis(int _maker){
 	};
 
 }
- 
+ /*
 void maker::passProdigy(prodigy *phIn){
 	ph = phIn;
 	ledCount = ph->ledCount;
 };
+
 
 
 void maker::dualStripes(){	
@@ -215,6 +216,6 @@ void maker::glitterBasic(){
 
 //blur1d(leds,ledCount,1);
 };
-
+*/
 
 

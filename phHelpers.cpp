@@ -3,10 +3,11 @@
 #endif
 
 extern "C"{
-  int _getpid(){ return -1;}
-  int _kill(int pid, int sig){ return -1; }
-  int _write(){return -1;}
+  int _getpid(){ Serial.println("AHHHH GETPID"); return 1;}
+  int _kill(int pid, int sig){ Serial.println("AHHHH KILLED"); return 1; }
+  int _write(){ Serial.println("AHHHH WRITE"); return 1;}
 }
+
 
 
 /**
@@ -51,7 +52,7 @@ uint8_t u8Rev(uint8_t val){
  *
  * @return     { description_of_the_return_value }
  */
-uint8_t u82l(uint8_t val, int lcount){
+uint8_t u82l(uint8_t val, int lcount = pflow2.LEDCount){
 	uint8_t u2l = map8(val,0,lcount);
 	return u2l;
 };
@@ -250,7 +251,9 @@ bool phTicker::tickCheck(){
 uint16_t phTicker::getTick(){
 
 
-
+	Serial.print(F(" GetTick Triggered"));
+	Serial.println();
+	
 	switch(tickMode){
 		case TPS_MODE:
 		//	Serial.println("TPS MODE Getting Tick");
@@ -474,7 +477,9 @@ void phTimer::start(){
 };
 
 void phTimer::reSet(){
-
+	Serial.print(F("Timer being reset "));
+	Serial.println();
+	
 	startTime=millis();
 	activated=true;
 };
@@ -516,7 +521,7 @@ uint8_t phTimer::remaining8(uint8_t scaleLow, uint8_t scaleHigh){
  */
 doubleTapper::doubleTapper(){
 
-	lastTapTime=micros();
+	lastTapTime=millis();
 };
 
 /**
@@ -526,7 +531,7 @@ doubleTapper::doubleTapper(){
  */
 void doubleTapper::setTapIntervalMillis(uint32_t millisIn){
 
-	tapIntervalMicros=millisIn*1000;
+	tapIntervalMicros=millisIn;
 };
 
 /**
@@ -543,7 +548,7 @@ void doubleTapper::setTapIntervalMicros(uint32_t microsIn){
  * @return     true: doubleTap triggered, false: not a double tap.
  */
 bool doubleTapper::tapIt(){	
-	thisTapTime = micros();
+	thisTapTime = millis();
 
 	if(doubleTapped){doubleTapped=false;}
 	thisTimeDiff = thisTapTime - lastTapTime;
@@ -627,7 +632,7 @@ void shapeGenerator::play(){
 		//Serial.println(x);
 	uint8_t y = x;
 	pflow2.leds[y*y] = CHSV(143,255,255);
-		delay(1);
+		//delay(1);
 
 };
 
@@ -717,21 +722,95 @@ void stripMirrorH(CRGB *_leds,uint16_t _LEDCount){
 
 
 
-phMaker::phMaker(){
 
+
+bool phMakerBase::load(){
+	leds = pflow2.leds;
+	isDummy = false;
+	getPFRefs();
 };
 
-bool phMaker::load(){
+bool phMakerBase::load(CRGB *_dummyLEDs){
+	leds = _dummyLEDs;
+	isDummy = true;
+	getPFRefs();
+};
+
+void phMakerBase::getPFRefs(){
 	beat = &pflow2.beater;
 	params = &pflow2.settings.params;
-	leds = pflow2.leds;
+	BPM = &pflow2.settings.run.data.BPM;
+	LEDCount = pflow2.LEDCount;
+};
+
+
+
+
+
+void phMakerExample::prep(){
+		seg=6;
+};
+void phMakerExample::run(){
+	if(!isDummy){ FastLED.clear(); }
+	
+	uint8_t markPoint = map8(beat8(160),0,seg-1);
+
+	leds[markPoint] = CHSV(128,255,255);
+	stripRepeatAll(leds,LEDCount,seg);
+};
+
+
+
+
+
+void phMaker::prep(){
+	seg = 6;
 };
 
 void phMaker::run(){
+	if(!isDummy){ FastLED.clear(); }
+	
+	uint8_t markPoint = map8(u8Rev(beat8(250)),0,seg-1);
+
+	leds[markPoint] = CHSV(64,255,255);
+	stripRepeatAll(leds,LEDCount,seg);
+	//delay(1);
 };
 
-void phMaker::die(){	
+void blender::prep(){
+	pat1.prep();
+	pat2.prep();
+
+	leds1 = new CRGB[LEDCount];
+	leds2 = new CRGB[LEDCount];
+
+	pat1.load(leds1);
+	pat2.load(leds2);
 };
+
+void blender::run(){
+	if(!isDummy){ FastLED.clear(); }
+
+	/**@todo DoItBetterFasterStronger
+	 * There is a better way to wipe out the array then this.
+	 * Figure it out. Fix it. 
+	 */
+ 	for(int l=0;l<LEDCount;l++){leds1[l]=CRGB(0,0,0);}
+
+ 	for(int l=0;l<LEDCount;l++){leds2[l]=CRGB(0,0,0);}
+
+	pat1.run();
+	pat2.run();
+	uint8_t blendAmount = ease8InOutApprox(beatsin8(2));
+	blend (leds1, leds2,leds,LEDCount,blendAmount);
+
+	/*for(int l=0;l<LEDCount;l++){
+		leds[l]=leds1[l];
+	}
+	*/
+}
+
+
 
 
 

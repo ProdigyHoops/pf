@@ -274,6 +274,24 @@ class phTicker{
 
 };
 
+const uint8_t phGamma8[] = {
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
+    1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
+    2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
+    5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
+   10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
+   17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
+   25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
+   37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
+   51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
+   69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
+   90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
+  115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
+  144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
+  177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
+  215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
+
 
 
 /**
@@ -354,13 +372,15 @@ class phTimer{
 	 */
 	uint8_t remaining8(uint8_t scaleLow=0, uint8_t scaleHigh=255);
 
-	uint32_t timeMicros;
-	uint32_t timeMillis;
-	uint32_t startTime;
-	uint32_t endTime;
-	bool activated = true;
-};
+		uint32_t timeMicros;
+		uint32_t timeMillis;
+		uint32_t startTime;
+		uint32_t endTime;
+		bool activated = true;
+	};
 
+
+/*
 /**
  * @brief      Version 2 Timer. Once timer is started, timer can not be reset.
  *             Timer must run out. Timer can be called with
@@ -373,12 +393,12 @@ class phTimer{
  *             run out before it can be set again
  *
  * @ingroup    Workers
- */
+ 
 class phTimer2{
 
 	/**
 	 * @brief      { function_description }
-	 */
+	 
 	phTimer2();
 
 
@@ -386,7 +406,7 @@ class phTimer2{
 	 * @brief      Sets and go.
 	 *
 	 * @return     { description_of_the_return_value }
-	 */
+
 	uint32_t setAndGo();
 
 
@@ -394,23 +414,24 @@ class phTimer2{
 	 * @brief      Starts a time.
 	 *
 	 * @return     { description_of_the_return_value }
-	 */
+	
 	uint32_t startTime();
 
 	/**
 	 * @brief      { function_description }
-	 */
+	
 	void activate();
 
 
 	/**
 	 * @brief      { function_description }
-	 */
+
 	void deactivate();
 
 
 	bool isActivated;
 };
+*/
 
 /**
  * @brief      Class for double tapper.
@@ -825,11 +846,12 @@ class phWave{
 
 
 
-/**@todo optionsDisplay is really just acting as an activator.  Complete activator
+/**@todo REMAKE
+ * optionsDisplay is really just acting as an activator.  Complete activator
  * class with timer based triggers and manual triggers.  Include activator object
  * in default "maker" class and use makers for all display options. 
  */
-
+/*
 class phActivator{
  public:
      phActivator(){};
@@ -846,41 +868,130 @@ class phActivator{
      void touch();
      void start();
 
-     phTimer timer;
+     //phTimer timer;
 
  private:
     uint8_t activatorMode;
 };
+*/
 
 
 
 
-class phMaker{
-public:
-phMaker();
-~phMaker(){};
-
-
-/**
- * @brief      gets called once each time this
- * 			maker is triggered.
- * 
- *
- * @return     { description_of_the_return_value }
+/**@todo RESEARCH
+ *  Figure out how to load the current animation by making a new
+ *  instance ot the animations class, and then passing a pointer to
+ *  the player controller. This would let the player controller handle
+ *  the calls to .load(), run(), and deconstructing before loading next;
+ *  
  */
-bool load();
-void run();
-void die();
+class phMakerBase{
+	public:
+		phMakerBase(){};
+		~phMakerBase(){};
 
-phActivator status;
+		bool load();
+		bool load(CRGB *_dummyLEDs);
+		void getPFRefs();
 
-protected:
-	phBeater * beat;
-	paramPacket * params;
-	CRGB * leds;
-	uint32_t lastIRKey;
+		//prep() is inteded to be used in derived classes.
+		//Included here in case derived class does not implement it.
+		//Prop class always calls .load(),.prep(),.run()
+		//Derived class's .prep() should overide this one.  
+		void prep(){};
+		bool isDummy;
+		
 
+	protected:
+		//phActivator status;
+		phBeater * beat;
+		paramPacket * params;
+		CRGB * leds;
+		uint16_t LEDCount;
 
+		//Gives easy access to IR Key presses
+		//The value only lives for the cycle in which it was
+		//detected and is wiped during cycle maintenance. 
+		//
+		//Keep in mind that using this value in an animation 
+		//does not stop the IRkey pressed from performing any
+		//default action it's assigned to, so make sure you 
+		//aren't using a key that will have confliting results
+		//
+		//Intended for implementing very simple ir response.
+		//See remote or control class if you need more elaborate
+		//Remote integration.
+		uint32_t *irIn;
+		uint32_t *BPM;
+};
+
+class phMakerExample : public phMakerBase{
+	public:
+		phMakerExample(){};
+		~phMakerExample(){};
+		uint16_t seg;
+		/**
+		 * @brief      called upon activating this maker.
+		 * Use as needed to setup members of this class.
+		 * The maker base class has a .load() function that gets
+		 * called before this function. 
+		 * .load() provides this class with access to global values
+		 * and controls usefull for generating animations. 
+		 * 
+		 */
+		void prep();
+
+		/**
+		 * @brief     This is where the actual maker code should exist. 
+		 * .run() is looped by the prop class for the duration of time
+		 * this maker is active. Do NOT use timeblocking functions 
+		 * unless absolutely needed. 
+		 * 
+		 * Prop class manages the actual output to the leds so you
+		 * shouldn't have any calls to FastLED.show().
+		 * 
+		 * HOWEVER, the maker classes DO decide how the clearing
+		 * of the previous frame is handled, so you need to atleast 
+		 * include FastLED.clear(); at the beginning of .run()
+		 * Free to use any other method desired. ie: fadeToBlackBy();
+		 * 
+		 * 
+		 */
+		void run();
+
+		// Not sure if this is needed, or has any benefit. 
+		// Is there ever a benifit from a class knowing
+		// it's about to be deconstructed?
+		void prepareForDeath(){};
+
+};
+
+class phMaker : public phMakerBase{
+	public:
+		phMaker(){};
+		~phMaker(){};
+
+		void prep();
+		void run();
+		void prepareForDeath(){};
+
+		uint8_t seg;
+};
+
+class blender : public phMakerBase{
+	public:
+		blender(){};
+		~blender(){};
+
+		void prep();
+		void run();
+		void prepareForDeath(){};
+
+		phMakerExample pat1;
+		phMaker pat2;
+
+		CRGB *leds1;
+		CRGB *leds2;
 };
 
 

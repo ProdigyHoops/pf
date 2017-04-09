@@ -4,10 +4,10 @@
 
 
 
-class prodigy;
+//class prodigy;
 
 
-
+/*
 class maker{
     public:
         maker();
@@ -21,8 +21,8 @@ class maker{
         CRGB *leds;
         phConfig sets;
 
-        prodigy *ph;
-		void passProdigy(prodigy *phIn);
+        //prodigy *ph;
+		//void passProdigy(prodigy *phIn);
 
         //void loadPH();
         void beatScan(uint8_t bpm);
@@ -32,7 +32,7 @@ class maker{
 };
 
 
-
+*/
 #endif
 
 /*  Just here for easy reference while programming

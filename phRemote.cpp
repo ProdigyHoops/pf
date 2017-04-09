@@ -15,11 +15,12 @@ phRemote::phRemote(int pin)  : irrecv(pin){
 phRemote::~phRemote(){
 };
 
-
+/*
 void phRemote::passProdigy(prodigy *phIn){
 	
 	//ph = phIn;
 }
+*/
 
 void phRemote::loadProfile(irProfile profile){
 	irKeys[phIR.repeatKey]=irRepeatKey;
@@ -315,11 +316,13 @@ void phRemote::digitIn(int _inDigit){
 		//phDebug(F("DigitDo On, Processing running digit"));		
 		runningDigit = (runningDigit*10)+_inDigit;
 	}
+	/*
 	if(0){//ph->sets.run.data.isMaking){
 	//phDebug(F("Current Program = MAKING. Setting activeParamSet"));
 		    			    		
 	    		activeParamSet = _inDigit;   		
 	    	}
+	    	*/
 };
 
 

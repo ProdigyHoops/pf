@@ -20,6 +20,7 @@
 #include "Arduino.h"
 
 #include <SerialFlash.h>
+
 #ifndef __INC_FASTSPI_LED2_H
 #include <FastLED.h>
 #endif
@@ -27,7 +28,7 @@
 #include <i2c_t3.h>
 #include <SPI.h>
 #include <map>
- #include <vector>
+#include <vector>
 #include <EEPROM.h>
 #include <stdint.h>
 #include <IRremote.h>
@@ -342,11 +343,10 @@ enum errorCodes{
 #include "phHelpers.h"
 #endif
 
-
-
+/*
 #ifndef phMakers_h
 #include "phMakers.h"
-#endif
+#endif*/
 
 #ifndef phBitmap_h
 #include "phBitmap2.h"
@@ -463,7 +463,7 @@ class protege{
          */
         void control(uint8_t _action);
 
-        std::map<int,uint8_t> lockMenu;
+       // std::map<int,uint8_t> lockMenu;
 
         
      
@@ -527,6 +527,15 @@ class protege{
          * @param      displayControl  The display control
          */
         void setBPMGUI(optionsDisplay & displayControl);
+
+        //phMakerExample maker;
+        //phMaker maker2;
+        blender blendy;
+        uint32_t lastFrameTime;
+        uint32_t frameDelay;
+
+
+
 };
 
 
@@ -544,7 +553,7 @@ class prodigy2{
     /**
      * @brief      Destroys the object.
      */
-    ~prodigy2();
+    ~prodigy2(){};
 
     /**
      * @brief      { function_description }
@@ -614,7 +623,7 @@ class prodigy2{
     /**
      * @brief      { function_description }
      */
-    void doEvery100000millis();
+    void doEvery10000Millis();
 
     /**
      * @brief      { function_description }
@@ -654,8 +663,8 @@ class prodigy2{
 
     //Needed for hardware
     CRGB *leds;
-    CRGB *tmpLED; 
-    uint8_t batLevel;
+    //CRGB *tmpLED; 
+    float batLevel;
 
     //Needed to track state of special interfaces
     bool optionDisplayActive = false;
@@ -669,14 +678,17 @@ class prodigy2{
 
 
     //Misc
+    ////@todo Implement lastIRKey
+    //  and implement prodigy cycle maintenance
+    //  to do things like wipe lastIRKey
     uint32_t lastIRKey;
 
 
 
-    phWave waver;
-    phWave waver2;
-    phWave waver3;
-    shapeGenerator shaper;
+   // phWave waver;
+   // phWave waver2;
+   // phWave waver3;
+  //  shapeGenerator shaper;
 };
 extern prodigy2 pflow2;
 
@@ -685,9 +697,7 @@ extern prodigy2 pflow2;
 
 
 
-/**
- * @brief      Class for prodigy.
- */
+/*
 class prodigy{
     
     public:
@@ -701,13 +711,13 @@ class prodigy{
 
     /**
      * @brief      { function_description }
-     */
+     
     void setupLED();
     void setupIMU();
 
     /**
      * @brief      { function_description }
-     */
+     
     void cycleChecks();
     void play();
     void postFX();
@@ -719,7 +729,7 @@ class prodigy{
      * @brief      { function_description }
      *
      * @param[in]  rollVal  The roll value
-     */
+     
     void rollLED(uint8_t rollVal);
     void flash(uint8_t flashOnTime, uint8_t flashOffTime, uint8_t flashRepeats=1, uint8_t hue=32);
 
@@ -743,7 +753,7 @@ class prodigy{
      * @param[in]  val   The value
      *
      * @return     { description_of_the_return_value }
-     */
+     
     uint8_t u82l(uint8_t val);
     
     phConfig sets;
@@ -792,6 +802,7 @@ class prodigy{
 
     private:
 };
+*/
 
 
 //extern prodigy ph;
