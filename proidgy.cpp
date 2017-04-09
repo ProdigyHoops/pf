@@ -190,11 +190,14 @@ void prodigy2::doEvery1000Millis(){
 	Serial.print(prop.frameDelay);
 	Serial.println();
 	
+	
 };
 
 void prodigy2::doEvery10000Millis(){
 	Serial.print(F("Every10SecStarted "));
 	Serial.println();
+	prop.director.makerChangeTrigger=true;
+
 
 	
 	
@@ -248,6 +251,13 @@ void protege::configure(){
 	//maker2.prep();
 	blendy.load();
 	blendy.prep();
+	director.load();
+	director.prep();
+	director.makersDo(SIMPLE_BLUE,LOAD_W_DUMMY);
+	
+	director.currentMaker = SIMPLE_BLUE;
+	director.nextMaker=SIMPLE_PINK_REV;
+
 };
 
 
@@ -278,7 +288,14 @@ void protege::play(){
 	//Temporary Test Pattern
 
 	//pflow2.shaper.play();
-	
+
+
+	director.run();
+	FastLED.show();
+	director.clear();
+
+	};
+
 
 	
 	/*
@@ -287,11 +304,11 @@ void protege::play(){
 	pflow2.leds[beatMarker]=CHSV(123,255,255);
 	*/
 
-	blendy.run();
+	//blendy.run();
 	
-	FastLED.show();
+	
 		
-};
+
 
 
 void protege::postFX(){

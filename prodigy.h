@@ -55,7 +55,6 @@ enum powerSourceTypes{
   HYBRID_POWER
 };
 
-
 enum transitionTypes{
   TIME_IN_MILLIS=0,
   TIME_BY_BPM,
@@ -343,10 +342,10 @@ enum errorCodes{
 #include "phHelpers.h"
 #endif
 
-/*
+
 #ifndef phMakers_h
 #include "phMakers.h"
-#endif*/
+#endif
 
 #ifndef phBitmap_h
 #include "phBitmap2.h"
@@ -527,7 +526,7 @@ class protege{
          * @param      displayControl  The display control
          */
         void setBPMGUI(optionsDisplay & displayControl);
-
+        phDirector director;
         //phMakerExample maker;
         //phMaker maker2;
         blender blendy;
